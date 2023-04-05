@@ -11,6 +11,8 @@ const refs = {
   seconds: document.querySelector('span[data-seconds]'),
 };
 
+
+const DELAY_TIME = 1000;
 // console.log(refs.picker, refs.days, refs.hours, refs.minutes, refs.seconds);
 
 const options = {
@@ -20,29 +22,70 @@ const options = {
   minuteIncrement: 1,
   onClose(selectedDates) {
     console.log(selectedDates[0]);
+
+    if (selectedDates[0]-Date.now()<=0){
+      // console.log("дата раньше нынешней", (selectedDates[0]-Date.now()));
+      window.alert("Please choose a date in the future");
+      refs.start.setAttribute("disabled", "true");
+      return;
+    }
+
+    refs.start.removeAttribute("disabled", "true");
+
   },
 };
 
 let picker = flatpickr(refs.picker, options);
-console.log(picker);
+console.log( 'picker.selectedDates[0]', picker.selectedDates[0]);
 
 refs.start.addEventListener('click', onClickStartHandler);
 
-function onClickStartHandler(event) {
-  console.log('start');
-}
+
+
+let startDate = null;
+let intervalId =  null;
+
+
 
 const timer = {
-  start() {
-    const startDate = new Date("Thu Apr 10 2023 23:59:05 GMT+0300");
-    console.dir("startDate", startDate);
+  start(startDate) {
+  
+     intervalId = setInterval(() => {
+      console.log("startDate", startDate, Date.now());
+      
+      const convertedTime = convertMs(startDate-Date.now());
+
+      // console.log(convertedTime, 'this.startDate - Date.now()', this.startDate, Date.now());
+      refs.days.textContent = convertedTime.days;
+      refs.hours.textContent = convertedTime.hours;
+      refs.minutes.textContent = convertedTime.minutes;
+      refs.seconds.textContent = convertedTime.seconds;
+
+
+    }, DELAY_TIME);
+
   },
+
+  stop(){
+    clearInterval(intervalId);
+  }
 };
 
-timer.start();
+
+function onClickStartHandler() {
+  startDate = picker.selectedDates[0];
+  timer.start(startDate);
+
+
+  if (timer.startDate === new Date()){
+    console.log('timer.startDate === new Date()', (timer.startDate === new Date()))
+    timer.stop();
+  }
+}
+
 
 function convertMs(ms) {
-  // Number of milliseconds per unit of time
+  // Number of milliseconds per unit of time  
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
@@ -61,3 +104,4 @@ function convertMs(ms) {
 }
 
 console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
+console.log(convertMs(140000));
