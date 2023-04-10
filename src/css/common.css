@@ -16,3 +16,26 @@ img {
   display: block;
   max-width: 100%;
 }
+
+.timer{
+  margin-top: 40px;
+}
+
+.field{
+  display: inline-block;
+  padding: 20px 40px;
+  margin-bottom: 40px;
+  background-color: rgb(202, 250, 202);
+  border: 2px solid rgb(202, 250, 202);
+  border-radius: 10px;
+}
+
+button[data-start]{
+  display: inline-block;
+  padding: 10px 30px;
+  margin-left: 20px;
+  background-color: rgb(149, 250, 250);
+  border: 1px solid rgb(149, 250, 250);
+
+  font-size: 16px;
+}

@@ -11,9 +11,9 @@ const refs = {
   seconds: document.querySelector('span[data-seconds]'),
 };
 
+refs.start.setAttribute('disabled', 'true');
 
 const DELAY_TIME = 1000;
-// console.log(refs.picker, refs.days, refs.hours, refs.minutes, refs.seconds);
 
 const options = {
   enableTime: true,
@@ -21,71 +21,73 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    console.log(selectedDates[0]);
 
-    if (selectedDates[0]-Date.now()<=0){
-      // console.log("дата раньше нынешней", (selectedDates[0]-Date.now()));
-      window.alert("Please choose a date in the future");
-      refs.start.setAttribute("disabled", "true");
+    if (selectedDates[0] - Date.now() <= 0) {
+      window.alert('Please choose a date in the future');
       return;
     }
 
-    refs.start.removeAttribute("disabled", "true");
-
+    refs.start.removeAttribute('disabled', 'true');
   },
 };
 
 let picker = flatpickr(refs.picker, options);
-console.log( 'picker.selectedDates[0]', picker.selectedDates[0]);
+// console.log( 'picker.selectedDates[0]', picker.selectedDates[0]);
 
 refs.start.addEventListener('click', onClickStartHandler);
 
-
-
 let startDate = null;
-let intervalId =  null;
-
-
+let intervalId = null;
+let isActive = false;
 
 const timer = {
   start(startDate) {
-  
-     intervalId = setInterval(() => {
-      console.log("startDate", startDate, Date.now());
-      
-      const convertedTime = convertMs(startDate-Date.now());
+    if (isActive){
+      return;
+    }
 
-      // console.log(convertedTime, 'this.startDate - Date.now()', this.startDate, Date.now());
-      refs.days.textContent = convertedTime.days;
-      refs.hours.textContent = convertedTime.hours;
-      refs.minutes.textContent = convertedTime.minutes;
-      refs.seconds.textContent = convertedTime.seconds;
+    isActive = true;
+    intervalId = setInterval(() => {
+
+      const zero = 0;
+    
+      
+      const convertedTime = convertMs(startDate - Date.now());
+      const {days, hours, minutes, seconds} = convertedTime;
+      console.log('days, hours, minutes, seconds', days, hours, minutes, seconds);
+
+
+      refs.days.textContent = addLeadingZero(days);
+      refs.hours.textContent = addLeadingZero(hours);
+      refs.minutes.textContent = addLeadingZero(minutes);
+      refs.seconds.textContent = addLeadingZero(seconds);
+
+      if (days===zero && hours===zero && minutes===zero && seconds===zero) {
+        console.log("time to stop!");
+        timer.stop();
+        return;
+      }
 
 
     }, DELAY_TIME);
-
   },
 
-  stop(){
+  stop() {
     clearInterval(intervalId);
-  }
+    isActive = false;
+  },
 };
+
 
 
 function onClickStartHandler() {
   startDate = picker.selectedDates[0];
   timer.start(startDate);
 
-
-  if (timer.startDate === new Date()){
-    console.log('timer.startDate === new Date()', (timer.startDate === new Date()))
-    timer.stop();
-  }
 }
 
-
 function convertMs(ms) {
-  // Number of milliseconds per unit of time  
+  // Number of milliseconds per unit of time
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
@@ -103,5 +105,7 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-console.log(convertMs(140000));
+
+function addLeadingZero(value){
+  return String(value).padStart(2, "0");
+}
